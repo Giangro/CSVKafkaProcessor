@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.util.ResourceUtils;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
+import it.poste.csvkafkaprocessor.service.MessageSenderService;
 import java.io.FileReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -44,18 +45,14 @@ public class CsvKafkaProcessorApplication {
 
     @Autowired
     private Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder;
+    
+    @Autowired
+    private MessageSenderService messageSenderService;
 
     private ObjectMapper objectMapper;
 
-    EmitterProcessor<Message<String>> processor = EmitterProcessor.create();
-
     public static void main(String[] args) {
         SpringApplication.run(CsvKafkaProcessorApplication.class, args);
-    }
-
-    @Bean
-    public Supplier<Flux<Message<String>>> process() {
-        return () -> this.processor;
     }
 
     @Bean
@@ -80,9 +77,20 @@ public class CsvKafkaProcessorApplication {
                     Map<String, Object> header = getHeaderMap(nextRecord[0]);
                     Map<String, Object> newheader = new HashMap<>();
                     header.entrySet()
-                            .forEach(entry -> {
-                                log.info("key = {}, value=\"{}\"", entry.getKey(), entry.getValue());
-                                newheader.put(entry.getKey(),"\""+entry.getValue()+"\"");
+                            .forEach(entry -> {                                
+                                if ("contentType".equals(entry.getKey())) {
+                                    log.info ("skip content type");
+                                } // if
+                                else {
+                                    if ("forced".equals(entry.getKey())) {
+                                        log.info("key = {}, value={}", entry.getKey(), entry.getValue());
+                                        newheader.put(entry.getKey(),entry.getValue());
+                                    } // if
+                                    else {
+                                        log.info("key = {}, value=\"{}\"", entry.getKey(), entry.getValue());
+                                        newheader.put(entry.getKey(),"\""+entry.getValue()+"\"");
+                                    } // else
+                                } // if
                             });
                     log.info("spring header json type = {}", springHeaderJsonType);
                     newheader.put("spring_json_header_types", springHeaderJsonType);
@@ -91,9 +99,9 @@ public class CsvKafkaProcessorApplication {
                     GenericMessage<String> msgtosend = 
                             new GenericMessage<String>(nextRecord[1],newheader);
                     
-                    this.processor.onNext(msgtosend);
+                    messageSenderService.sendMessage("process-out-0", msgtosend);
                 }
-                log.info("records to send: <{}>", counter);
+                log.info("records sent: <{}>", counter);
             }
 
         };

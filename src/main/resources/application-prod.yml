@@ -10,19 +10,23 @@ spring:
               
       kafka:                       
         binder:          
-          brokers: kafka
+          #brokers: kafka
           #brokers: kafka1,kafka2,kafka3
-          #brokers: plogkaf01a,plogkaf02a,plogkaf03a
+          brokers: plogkaf01a,plogkaf02a,plogkaf03a
           defaultBrokerPort: 9092                    
-          minPartitionCount: 3
+          minPartitionCount: 1
           autoCreateTopics: true
           autoAddPartitions: true  
           headerMapperBeanName: defaultKafkaHeaderMapper
-
+        bindings:
+            process-out-0:
+                producer:
+                    sync: true
+                
 logging:
   level:
     org.springframework.kafka.transaction: debug
     
-file: 'classpath:data/Simple_RecuperoSDH_Request_2.CSV'
+file: 'classpath:data/RecuperoSDH_Request_2.CSV'
 #file: 'classpath:data/simple.csv'
 springHeaderJsonType: '{"codiceStatoOdl":"java.lang.String","tipoMessaggio":"java.lang.String","forced":"java.lang.Boolean","publisher":"java.lang.String","codiceOggetto":"java.lang.String","contentType":"java.lang.String"}'

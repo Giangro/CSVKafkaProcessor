@@ -7,8 +7,11 @@ package it.poste.csvkafkaprocessor.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.support.DefaultKafkaHeaderMapper;
 import org.springframework.kafka.support.SimpleKafkaHeaderMapper;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
@@ -17,6 +20,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @Configuration
 @EnableTransactionManagement
+@EnableRetry
+@ComponentScan(basePackages = "it.poste")
 @Slf4j
 public class Config {
 
@@ -29,5 +34,5 @@ public class Config {
         //defaultKafkaHeaderMapper.setEncodeStrings(true);
         return defaultKafkaHeaderMapper;
     }
-
+     
 }

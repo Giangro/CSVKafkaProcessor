@@ -10,9 +10,9 @@ spring:
               
       kafka:                       
         binder:          
-          #brokers: kafka
+          brokers: kafka
           #brokers: kafka1,kafka2,kafka3
-          brokers: plogkaf01a,plogkaf02a,plogkaf03a
+          #brokers: plogkaf01a,plogkaf02a,plogkaf03a
           defaultBrokerPort: 9092                    
           minPartitionCount: 1
           autoCreateTopics: true
@@ -22,6 +22,10 @@ spring:
             process-out-0:
                 producer:
                     sync: true
+                    configuration:
+                        max.in.flight.requests.per.connection: 1
+                        retries: 2147483647                        
+                        acks: all
                 
 logging:
   level:
